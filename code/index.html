@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./maina.css">
+    <link rel="stylesheet" href="./train.css">
+    <link rel="stylesheet" href="./main.js">
+
+    <title>Music player</title>
+</head>
+<body>
+
+    <!-- player -->
+    <div class="player">
+        <!-- header  -->
+        <div class="header">
+            <h4> Now playing </h4>
+            <h2>Song Name</h2>
+        </div>
+
+        <!-- thumb  -->
+        <div class="cd">
+            <div class="cd-thumb" style="background-image: url('./library/avaSong/bonchulam.jpg') ; "></div>
+        </div>
+        <!-- control  -->
+
+        <div class="control">
+            <div class="btn btn-repeat">
+              <i class="fas fa-redo"></i>
+            </div>
+            <div class="btn btn-prev">
+              <i class="fas fa-step-backward"></i>
+            </div>
+            <div class="btn btn-toggle-play">
+              <i class="fas fa-pause icon-pause"></i>
+              <i class="fas fa-play icon-play"></i>
+            </div>
+            <div class="btn btn-next">
+              <i class="fas fa-step-forward"></i>
+            </div>
+            <div class="btn btn-random">
+              <i class="fas fa-random"></i>
+            </div>
+          </div>
+          <input id="progress" class="progress" type="range" value="0" step="1" min="0" max="100">
+
+          <audio id="audio" src=""></audio>
+    </div>
+    <!-- playlist  -->
+    <div class="playlist">
+
+        <!-- song  -->
+        <div class="song">
+
+            <!-- songDetail  -->
+            <div class="thumb">
+
+            </div>
+            <div class="body">
+                <h3 class="title">
+                    Music name 
+                </h3>
+                <p class="author">
+                    Singer 
+                </p>
+                <p class="play-time">
+                    songTime 
+                </p>
+            </div>
+            <!-- SongOption  -->
+            <div class="option">
+                <i class="fas fa-ellipsis-h"></i>
+            </div>
+        </div>
+
+    </div>
+    <script>
+        /**
+         * 
+         * 1. render songs
+         * 2. scroll top
+         * 3. play/pause/seek
+         * 4. cd rotate
+         * 5. next/previous
+         * 6. random
+         * 7. next/ repeat when ended
+         * 8. active song
+         * 9. scroll active song into view
+         * 10. play song when click
+         */
+        const $ = document.querySelector.bind(document)
+        const $$ = document.querySelectorAll.bind(document)
+
+        const songPlaying = $('#audio')
+        const progress = $('.progress')
+        const player = $('.player')
+        const heading = $('.header h2')
+        const cdThumb = $('.cd-thumb')
+        const audio = $('#audio')
+        const playBtn = $('.btn-toggle-play')
+        const cd = $('.cd')
+        const nextBtn = $('.btn-next')
+        const preBtn = $('.btn-prev')
+        const randomBtn = $('.btn-random')
+
+
+        const list = $('.playlist');
+        console.log(list)
+        const app = {
+            currentIndex: 0,
+            isFuckingPlaying: false,
+            isRandom: false,
+            loadedList: [],
+            songs: [
+        {
+            name: "Bon chu lam",
+            singer: "Truc nhan",
+            playtime: "3:26",
+            img: "../library/avaSong/bonchulam.jpg",
+            link: "../library/music/Bon-Chu-Lam-Truc-Nhan-Truong-Thao-Nhi.mp3",
+        },
+        {
+            name: "Chua bao gio",
+            singer: "Trung Quan",
+            playtime: "3:20",
+            img: "../library/avaSong/chubaogio.jpg",
+            link: "../library/music/Chua-Bao-Gio-Trung-Quan-Idol.mp3",
+        },
+        {
+            name: "Dung hoi em",
+            singer: "JUUN",
+            playtime: "3:23",
+            img: "../library/avaSong/dunghoiem.jpg",
+            link: "../library/music/Dung-Hoi-Em-Cover-JUUN-D.mp3",
+        },
+        {
+            name: "Duoi nhung con mua",
+            singer: "Mr Siro",
+            playtime: "3:03",
+            img: "../library/avaSong/duoinhungconmua.jpg",
+            link: "../library/music/Duoi-Nhung-Con-Mua-Mr-Siro.mp3",
+        },
+        {
+            name: "Kem duyen",
+            singer: "Jack 5 cu",
+            playtime: "4:02",
+            img: "../library/avaSong/kem-duyen-rum-ft-nit-ft-masew.jpg",
+            link: "../library/music/Kem-Duyen-Rum-NIT-Masew.mp3",
+        },
+        {
+            name: "Loi yeu thuong",
+            singer: "Duong Trieu Vu",
+            playtime: "3:53",
+            img: "../library/avaSong/loiyeuthuong.jpg",
+            link: "../library/music/Loi-Yeu-Thuong-Duong-Trieu-Vu.mp3",
+        },
+        {
+            name: "Muon khoc that to",
+            singer: "Truc Nhan",
+            playtime: "4:30",
+            img: "../library/avaSong/muonkhocthato.jpg",
+            link: "../library/music/Muon-Khoc-That-To-Truc-Nhan.mp3",
+        },
+        {
+            name: "Nhu Loi Don",
+            singer: "Sam Smith",
+            playtime: "2:52",
+            img: "../library/avaSong/nhuloidon.jpg",
+            link: "../library/music/Nhu-Loi-Don-Bao-Anh.mp3",
+        },
+        {
+            name: "Tha vao mua",
+            singer: "JTrung Quan Ai Do",
+            playtime: "3:25",
+            img: "../library/avaSong/thavaomua.jpg",
+            link: "../library/music/Tha-Vao-Mua-Trung-Quan-Idol.mp3",
+        },
+        {
+            name: "Tuy Am",
+            singer: "Masew",
+            playtime: "3:58",
+            img: "../library/avaSong/tuyam.jpg",
+            link: "../library/music/Tuy-Am-Xesi-Masew-Nhat-Nguyen.mp3",
+        },],
+            render: function(){
+                const htmls = this.songs.map(song => {
+                    let a = 
+                    `<div class="song">
+            
+                        <div class="thumb" style= "background-image: url('${song.img}')">
+                            
+                        </div>
+                        <div class="body">
+                            <h3 class="title">
+                                ${song.name}
+                            </h3>
+                            <p class="author">
+                                ${song.singer}
+                            </p>
+                            <p class="playtime">
+                                ${song.playtime}
+                            </p>
+                                
+                        </div>
+                        <div class="option">
+                            <i class="fa-solid fa-ellipsis"></i>
+                        </div>
+                    </div>`
+                    return a
+                })
+                $('.playlist').innerHTML = htmls.join('');
+            },
+
+            defineProperties: function (){
+                Object.defineProperty(this, 'currentSong', {
+                    get: function() {
+                        console.log(this)
+                        return this.songs[this.currentIndex]
+                    }
+                })
+            },
+            handleEvents: function(){
+                const cdWidth = cd.offsetWidth
+                
+
+                // Xử lý CD quay / dừng
+                const cdThumbAnimate =  cdThumb.animate(
+                [
+                    {   
+                        transform: 'rotate(0deg)',
+                        transform: 'rotate(360deg)',
+                    }
+                ], 
+                {
+                    duration: 10000, //10 sec
+                    iterations: Infinity,
+                }
+                )
+                cdThumbAnimate.pause()
+
+                // xử lý phóng to thu nhỏ CD
+                document.onscroll = function (){
+                    const scrollTop = window.scrollY || document.documentElement.scrollTop;
+                    const newCdWidth = cdWidth - scrollTop;
+
+                    cd.style.width = newCdWidth > 0? newCdWidth + 'px' : 0;
+                    cd.style.opacity = newCdWidth/cdWidth;
+                }
+
+                // Xử lý play/pause 
+                playBtn.onclick = function (){
+                    if (app.isFuckingPlaying){
+                        audio.pause()
+                    } else{
+
+                        audio.play()
+                    }
+                },
+                audio.onplay = function () {
+                    app.isFuckingPlaying = true
+                    player.classList.add('playing')
+                    cdThumbAnimate.play()
+                    console.log(app.loadedList)
+                }
+                audio.onpause = function () {
+                    app.isFuckingPlaying = false
+                    player.classList.remove('playing')
+                    cdThumbAnimate.pause()
+                }
+                
+                // Thay doi con tro khi bai hat chay
+                audio.ontimeupdate = function () {
+                    if (audio.duration){
+                        const progressPercent = Math.floor((audio.currentTime / audio.duration)*100)
+                        progress.value = progressPercent
+                    }
+                }
+
+                // Xử lý tua bài
+                progress.onchange = function (e){
+                    const seekTime = audio.duration / 100 * e.target.value
+                    audio.currentTime = seekTime
+                }
+
+                // Xử lý next bài
+                nextBtn.onclick = function(){
+                    app.nextSong()
+                }
+                // Xử lý lùi bài
+                preBtn.onclick = function(){
+                    app.preSong()
+                }
+                // Xử lý random
+                randomBtn.onclick = function(){
+                    app.isRandom = !app.isRandom
+                    randomBtn.classList.toggle('active', app.isRandom)
+                }
+                
+            },
+
+            nextSong: function () {
+                this.currentIndex++
+                if (this.currentIndex >= this.songs.length) {
+                    this.currentIndex = 0
+                }
+                audio.onpause()
+                app.loadCurrentSong()
+                
+            },
+            preSong: function () {
+                this.currentIndex--
+                if (this.currentIndex < 0) {
+                    this.currentIndex = this.songs.length
+                }
+                audio.onpause()
+                this.loadCurrentSong()
+                
+            },
+            playRandomSong: function(){
+                let newIndex
+                do {
+                    newIndex = Math.floor(Math.random() * this.songs.length)
+                } while (newIndex == app.currentIndex)
+                this.currentIndex = newIndex
+                This.loadCurrentSong()
+            },
+
+            getNextIndex: function (){
+                // xử lý next bài không trùng
+                app.loadedList.push(app.currentIndex)
+                
+            },
+
+            mixSong: function(){
+                
+                if (app.isRandom) {
+
+                }
+            },
+            
+            loadCurrentSong: function (){
+                heading.textContent = this.currentSong.name
+                cdThumb.style.backgroundImage = `url('${this.currentSong.img}')`
+                audio.src = this.currentSong.link
+                console.log(heading, cdThumb, audio)
+            },
+
+            
+            start: function(){
+                //ĐỊnh nghĩa các thuộc tính cho object
+                this.defineProperties()
+                
+                //Lắng nghe / xử lý các sự kiện DOM events
+                this.handleEvents()
+                
+                // Tải thông tin bai hát đầu tiên vào UI khi chạy ứng dụng
+                this.loadCurrentSong()
+                
+                //render playlist
+                this.render()
+            },
+        }
+        // $('.header h2').innerHTML = song.name;
+
+        app.start()
+
+    </script>
+<script src="https://kit.fontawesome.com/1173538a12.js" crossorigin="anonymous"></script>
+</body>
+</html>
