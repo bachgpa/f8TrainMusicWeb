@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -93,6 +93,8 @@
         const $ = document.querySelector.bind(document)
         const $$ = document.querySelectorAll.bind(document)
 
+        const PLAYER_STORAGE_KEY = 'F8-player'
+
         const songPlaying = $('#audio')
         const progress = $('.progress')
         const player = $('.player')
@@ -104,15 +106,22 @@
         const nextBtn = $('.btn-next')
         const preBtn = $('.btn-prev')
         const randomBtn = $('.btn-random')
-
+        const repeatBtn = $('.btn-repeat')
+        const song = $('.song')
 
         const list = $('.playlist');
-        console.log(list)
         const app = {
             currentIndex: 0,
+
             isFuckingPlaying: false,
             isRandom: false,
+            isRepeat: false,
             loadedList: [],
+            config: JSON.parse(localStorage.getItem(PLAYER_STORAGE_KEY)) || {},
+            setconfig: function(key, value){
+                app.config[key] = value;
+                localStorage.setItem(PLAYER_STORAGE_KEY, JSON.stringify(app.config))
+            },
             songs: [
         {
             name: "Bon chu lam",
@@ -185,9 +194,9 @@
             link: "../library/music/Tuy-Am-Xesi-Masew-Nhat-Nguyen.mp3",
         },],
             render: function(){
-                const htmls = this.songs.map(song => {
+                const htmls = this.songs.map((song, index) => {
                     let a = 
-                    `<div class="song">
+                    `<div class="song ${index === app.currentIndex ? 'active' : ''}" data-index = "${index}">
             
                         <div class="thumb" style= "background-image: url('${song.img}')">
                             
@@ -216,7 +225,6 @@
             defineProperties: function (){
                 Object.defineProperty(this, 'currentSong', {
                     get: function() {
-                        console.log(this)
                         return this.songs[this.currentIndex]
                     }
                 })
@@ -239,6 +247,8 @@
                 }
                 )
                 cdThumbAnimate.pause()
+                // cdThumbAnimate.startTime()
+                
 
                 // xử lý phóng to thu nhỏ CD
                 document.onscroll = function (){
@@ -286,19 +296,107 @@
 
                 // Xử lý next bài
                 nextBtn.onclick = function(){
-                    app.nextSong()
+                    if (app.isRandom){
+                        if (app.isFuckingPlaying){
+                            app.playRandomSong()
+                            audio.play()
+                        } else {
+                            app.playRandomSong()
+                            audio.pause()
+                        }
+
+                    } else {
+                        if (app.isFuckingPlaying){
+                            app.nextSong()
+                            audio.play()
+                        } else {
+                            app.nextSong()
+                            audio.pause()
+                        }
+
+                    }
+                    app.scrollToActiveSong()
                 }
                 // Xử lý lùi bài
                 preBtn.onclick = function(){
-                    app.preSong()
+                    if (app.isRandom){
+                        if (app.isFuckingPlaying){
+                            app.playRandomSong()
+                            audio.play()
+                        } else {
+                            app.playRandomSong()
+                            audio.pause()
+                        }
+
+                    } else {
+                        if (app.isFuckingPlaying){
+                            app.preSong()
+                            audio.play()
+                            // cdThumbAnimate.startTime()
+                            console.log(cdThumbAnimate)
+                        } else {
+                            app.preSong()
+                            audio.pause()
+                        }
+                        
+                    }
+                    app.scrollToActiveSong()
+
                 }
                 // Xử lý random
                 randomBtn.onclick = function(){
                     app.isRandom = !app.isRandom
                     randomBtn.classList.toggle('active', app.isRandom)
+                    app.setconfig('isRandom', app.isRandom)
                 }
-                
+                // Xử lý repeat
+                repeatBtn.onclick = function(){
+                    app.isRepeat = !app.isRepeat
+                    app.setconfig('isRepeat', app.isRepeat)
+
+                    repeatBtn.classList.toggle('active', app.isRepeat)
+                }
+                // Xử lý next song when ended
+                audio.onended = function(){
+
+                    if (app.isRepeat) {
+                        audio.play()                        
+                    } else {
+                        nextBtn.click()
+                        audio.play()
+                    }
+                }
+                // Xử lý turn on bài đang phát
+                // Xu ly nhan vao bai thi active
+                list.onclick = function(e){
+                    const songNode = e.target.closest('.song:not(.active)')
+                    if (e.target.closest('.song:not(.active)') || e.target.closest('.option')) {
+                        if (songNode) {
+                            app.currentIndex = Number(songNode.dataset.index)
+                            app.loadCurrentSong()
+                            audio.play()
+                            app.render()
+                        }
+                        //xu ly khi click vao song option
+                        if (songNode){
+                        }
+                    }
+                }
             },
+            // getNextIndex: function (){
+            //     // xử lý next bài không trùng
+            //     if (true
+            //         // app.loadedList.length == app.songs.length
+            //         ){
+            //         console.log(app.loadedList)
+            //         app.loadedList=[]
+            //         console.log(app.loadedList)
+            //     } else {
+            //         app.loadedList.push(app.currentIndex)
+            //         console.log(app.loadedList)    
+            //     }       
+            //     console.log(app.currentIndex)        
+            // },
 
             nextSong: function () {
                 this.currentIndex++
@@ -309,6 +407,7 @@
                 app.loadCurrentSong()
                 
             },
+
             preSong: function () {
                 this.currentIndex--
                 if (this.currentIndex < 0) {
@@ -318,37 +417,46 @@
                 this.loadCurrentSong()
                 
             },
+            scrollToActiveSong: function(){
+                setTimeout(()=>{
+                    $('.song.active').scrollIntoView(
+                        {behavior:"smooth", block: "nearest", });
+                },300)
+                console.log(123)
+            },
+
             playRandomSong: function(){
                 let newIndex
                 do {
                     newIndex = Math.floor(Math.random() * this.songs.length)
                 } while (newIndex == app.currentIndex)
                 this.currentIndex = newIndex
-                This.loadCurrentSong()
+                audio.onpause()
+                this.loadCurrentSong()
             },
 
-            getNextIndex: function (){
-                // xử lý next bài không trùng
-                app.loadedList.push(app.currentIndex)
-                
+            loadConfig: function(){
+                this.isRandom = this.config.isRandom
+                this.isRepeat = this.config.isRepeat
             },
 
-            mixSong: function(){
-                
-                if (app.isRandom) {
-
-                }
-            },
+            // playingSong: function(){
+            //     let dangPhat = $(`.${currentIndex}`)
+            //     console.log(dangPhat)
+            // },
             
             loadCurrentSong: function (){
                 heading.textContent = this.currentSong.name
                 cdThumb.style.backgroundImage = `url('${this.currentSong.img}')`
                 audio.src = this.currentSong.link
-                console.log(heading, cdThumb, audio)
+                progress.value = "0"
+                app.render()
             },
 
             
             start: function(){
+                // Gán cấu hình từ config vào ứng dụng
+                this.loadConfig()
                 //ĐỊnh nghĩa các thuộc tính cho object
                 this.defineProperties()
                 
@@ -360,6 +468,14 @@
                 
                 //render playlist
                 this.render()
+
+                // Hiển thị trạng thái ban đầu của btn mix và repeat 
+                randomBtn.classList.toggle('active', app.isRandom)
+
+                repeatBtn.classList.toggle('active', app.isRepeat)
+
+
+                // this.playingSong()
             },
         }
         // $('.header h2').innerHTML = song.name;
