@@ -43,6 +43,17 @@
             <div class="btn btn-random">
               <i class="fas fa-random"></i>
             </div>
+            <div class="btn btn-volume volume-container">
+                <div class="volume-icon">
+                    <i class="fa-sharp fa-solid fa-volume fa-volume-up"></i>
+                </div>
+                <div class="volume">
+                  <input class="volume-slider" id="volume-slider" type="range" step="1" min="0" max="100" value="">
+                  <!-- <progress min="0" max="100" value="50" ></progress> -->
+                  
+                </div>
+  
+            </div>
           </div>
           <input id="progress" class="progress" type="range" value="0" step="1" min="0" max="100">
 
@@ -77,6 +88,7 @@
 
     </div>
     <script>
+        
         /**
          * 
          * 1. render songs
@@ -92,7 +104,8 @@
          */
         const $ = document.querySelector.bind(document)
         const $$ = document.querySelectorAll.bind(document)
-
+        
+        const volume = $('volume')
         const PLAYER_STORAGE_KEY = 'F8-player'
 
         const songPlaying = $('#audio')
@@ -110,6 +123,22 @@
         const song = $('.song')
 
         const list = $('.playlist');
+
+        // day la voolume gpt
+        const volumeSlider = document.getElementById('volume-slider');
+        const volumeIcon = document.querySelector('.volume-icon');
+        
+        volumeSlider.addEventListener('input', function() {
+            const volumeValue = this.value;
+            const volumeIconClass = volumeValue > 0 ? 'fa-volume-up' : 'fa-volume-off';
+            volumeIcon.innerHTML = `<i class="fa ${volumeIconClass}"></i>`;
+        });
+        
+        // day la voolume gpt
+
+
+
+
         const app = {
             currentIndex: 0,
 
