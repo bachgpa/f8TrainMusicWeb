@@ -79,7 +79,7 @@ a {
     display: flex;
     justify-content: space-around;
     align-items: center;
-    padding: 18px 0 18px 0;
+    padding: 0 0 18px 0;
 }
 
 .control .btn {
@@ -118,13 +118,9 @@ a {
     cursor: pointer;
 }
 
-.progressAndVolume {
-    position: relative;
-    display: flex;
-}
 
 .progress {
-    width: 80%;
+    width: 100%;
     -webkit-appearance: none;
     height: 6px;
     outline: none;
@@ -143,7 +139,39 @@ a {
     cursor: pointer;
 }
 
+.btn.btn-volume {
+    /* transform: rotate(90deg); */
+    display: flex;
+    justify-content: center;
 
+}
+
+.btn-volume #volume-selector {
+    position: absolute;
+    
+}
+
+.btn-volume .volume-icon {
+    transform: rotate(-90deg);
+}
+.btn-volume #volume-selector {
+    transform: rotate(-90deg);
+    position: fixed;
+    top: 258px;
+    right: -80px;
+    background: red;
+    width: 250px;
+    height: 6px;
+}
+
+.btn-volume #volume-selector::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    color: aqua;
+    background-color: #ec1f55;
+}
+
+
+/* 
 .btn-volume {
     position: absolute;
     right: 0;
@@ -158,22 +186,19 @@ a {
     align-content: center;
     justify-content: center;
 
-    /* width: 200px;
-    height: 6px; */
 }
 .volume-icon {
     text-align: center;
 }
 
-.volume-icon .fa-volume-xmark,
-.volume-icon .fa-volume-up,
-.volume .volume-icon {
+.fa-volume-xmark,
+.fa-volume,
+.btn-volume {
     display: block;
     width: 20px;
     height: 20px;
     color: #666;
     transform: rotate(90deg);
-    /* position: absolute; */
 
 }
 
@@ -229,7 +254,7 @@ a {
     margin-left: 10px;
     text-align: center;
     color: aqua;
-} 
+}  */
 
 
 /* playlist  */
