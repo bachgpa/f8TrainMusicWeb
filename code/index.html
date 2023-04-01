@@ -50,7 +50,9 @@
             <div class="btn btn-volume">
                 <i class="volume-icon fa-sharp fa-solid fa-volume-high"></i>
                 <div class="volume-selection">
+                    <i class="vlmadj-icon fa-sharp fa-solid fa-volume-high"></i>
                     <input id="volume-selector" type="range" value="50" min="0" max="100" >
+                    <progress min="0" max="100" value="8"></progress>
                 </div>            
             </div>
         </div>
@@ -105,6 +107,11 @@
         const $$ = document.querySelectorAll.bind(document)
         
         const PLAYER_STORAGE_KEY = 'F8-player'
+        const volumeBtn = $('.volume-icon')
+        const volumeBar = $('.volume-selection')
+        const volumeSlider = $('.volume-selection input')
+        const volumeFill = $('.volume-selection progress')
+
 
         const songPlaying = $('#audio')
         const progress = $('.progress')
@@ -128,6 +135,7 @@
             isFuckingPlaying: false,
             isRandom: false,
             isRepeat: false,
+            isShowingVlolumeBar: false,
             loadedList: [],
             config: JSON.parse(localStorage.getItem(PLAYER_STORAGE_KEY)) || {},
             setconfig: function(key, value){
@@ -394,6 +402,43 @@
                         }
                     }
                 }
+                // volume function
+                volumeBtn.onclick = function(){
+                    app.isShowingVlolumeBar = !app.isShowingVlolumeBar
+                    volumeBar.classList.toggle('showFixed')
+                }
+                // volumeBtn.onmouseleave = function(){
+                //     setTimeout(()=>{
+                //         app.isShowingVlolumeBar = !app.isShowingVlolumeBar
+                //         volumeBar.classList.toggle('showFixed')
+
+                //     },1500)
+                // }
+                // volumeBar.onmouseout = function(){
+                //     setTimeout(()=> {
+                //         console.log(123)
+                //         app.isShowingVlolumeBar = !app.isShowingVlolumeBar
+                //         volumeBar.classList.toggle('showFixed')
+
+                //     },1500)
+                // }
+                volumeSlider.onmousemove = function(e){
+                    let volumeValue = Number(e.target.value)
+                    volumeFill.setAttribute('value', volumeValue)
+                    if (volumeValue <= 10){
+                        audio.volume = volumeValue/100
+                        document.querySelector('.volume-selection .vlmadj-icon').style.color = "#666"
+                        document.querySelector('.volume-selection .vlmadj-icon').classList.remove('fa-volume-xmark')
+                    } else if (volumeValue >10){
+                        audio.volume = volumeValue/100
+                        document.querySelector('.volume-selection .vlmadj-icon').style.color = "#f5f5f5"
+                        document.querySelector('.volume-selection .vlmadj-icon').classList.remove('fa-volume-xmark')
+                    } else {
+                        document.querySelector('.volume-selection .vlmadj-icon').classList.add('fa-volume-xmark')
+                        audio.volume = volumeValue/100
+                        console.log(123)
+                    }
+                }
             },
 
             nextSong: function () {
@@ -471,6 +516,8 @@
                 randomBtn.classList.toggle('active', app.isRandom)
 
                 repeatBtn.classList.toggle('active', app.isRepeat)
+
+                
 
 
                 // this.playingSong()
