@@ -51,13 +51,13 @@
                 <i class="volume-icon fa-sharp fa-solid fa-volume-high"></i>
                 <div class="volume-selection">
                     <i class="vlmadj-icon fa-sharp fa-solid fa-volume-high"></i>
-                    <input id="volume-selector" type="range" value="50" min="0" max="100" >
-                    <progress min="0" max="100" value="8"></progress>
+                    <input id="volume-selector" type="range" value="" min="0" max="100" >
+                    <progress min="0" max="100" value="50"></progress>
                 </div>            
             </div>
         </div>
 
-        <input id="progress" class="progress" type="range" value="0" step="1" min="0" max="100">
+        <input id="progress" class="progress" type="range" value="50" step="1" min="0" max="100">
         <audio id="audio" src=""></audio>
     </div>
     <!-- playlist  -->
@@ -109,7 +109,7 @@
         const PLAYER_STORAGE_KEY = 'F8-player'
         const volumeBtn = $('.volume-icon')
         const volumeBar = $('.volume-selection')
-        const volumeSlider = $('.volume-selection input')
+        const volumeSlider = $('.volume-selection #volume-selector')
         const volumeFill = $('.volume-selection progress')
 
 
@@ -132,10 +132,12 @@
         const app = {
             currentIndex: 0,
 
+            onOffVolumeBar: 0,
             isFuckingPlaying: false,
             isRandom: false,
             isRepeat: false,
             isShowingVlolumeBar: false,
+            volumeNum: '',
             loadedList: [],
             config: JSON.parse(localStorage.getItem(PLAYER_STORAGE_KEY)) || {},
             setconfig: function(key, value){
@@ -240,6 +242,8 @@
                     return a
                 })
                 $('.playlist').innerHTML = htmls.join('');
+                volumeSlider.value = app.config.volumeNumber
+                volumeFill.value = app.config.volumeNumber
             },
 
             defineProperties: function (){
@@ -284,7 +288,6 @@
                     if (app.isFuckingPlaying){
                         audio.pause()
                     } else{
-
                         audio.play()
                     }
                 },
@@ -292,7 +295,7 @@
                     app.isFuckingPlaying = true
                     player.classList.add('playing')
                     cdThumbAnimate.play()
-                    console.log(app.loadedList)
+
                 }
                 audio.onpause = function () {
                     app.isFuckingPlaying = false
@@ -406,38 +409,51 @@
                 volumeBtn.onclick = function(){
                     app.isShowingVlolumeBar = !app.isShowingVlolumeBar
                     volumeBar.classList.toggle('showFixed')
+                    app.onOffVolumeBar = 1
                 }
-                // volumeBtn.onmouseleave = function(){
-                //     setTimeout(()=>{
-                //         app.isShowingVlolumeBar = !app.isShowingVlolumeBar
-                //         volumeBar.classList.toggle('showFixed')
-
-                //     },1500)
-                // }
-                // volumeBar.onmouseout = function(){
-                //     setTimeout(()=> {
-                //         console.log(123)
-                //         app.isShowingVlolumeBar = !app.isShowingVlolumeBar
-                //         volumeBar.classList.toggle('showFixed')
-
-                //     },1500)
-                // }
+                volumeBtn.onmouseleave = function(){
+                    app.onOffVolumeBar = 2
+                    setTimeout(() => {
+                        if (app.onOffVolumeBar ==1){
+                            app.volumeBarControl()
+                        } else {
+                            app.volumeBarControl()
+                        }
+                    }, 2000);
+                }
+                
+                volumeSlider.onmouseleave = function(){
+                    app.onOffVolumeBar = 2
+                    app.volumeBarControl()
+                }
+                
                 volumeSlider.onmousemove = function(e){
-                    let volumeValue = Number(e.target.value)
+                    app.onOffVolumeBar = 1
+                    var volumeValue = e.target.value >= 1? e.target.value : 0
                     volumeFill.setAttribute('value', volumeValue)
-                    if (volumeValue <= 10){
+                    
+                    console.log(volumeValue)
+                    if (volumeValue <= 10 && volumeValue >= 1){
                         audio.volume = volumeValue/100
+
                         document.querySelector('.volume-selection .vlmadj-icon').style.color = "#666"
+
                         document.querySelector('.volume-selection .vlmadj-icon').classList.remove('fa-volume-xmark')
+                    
                     } else if (volumeValue >10){
                         audio.volume = volumeValue/100
+
                         document.querySelector('.volume-selection .vlmadj-icon').style.color = "#f5f5f5"
+
                         document.querySelector('.volume-selection .vlmadj-icon').classList.remove('fa-volume-xmark')
-                    } else {
+                        
+                    } else if (volumeValue < 1 ){
                         document.querySelector('.volume-selection .vlmadj-icon').classList.add('fa-volume-xmark')
+
                         audio.volume = volumeValue/100
-                        console.log(123)
                     }
+
+                    app.setconfig('volumeNumber', volumeValue)
                 }
             },
 
@@ -465,7 +481,19 @@
                     $('.song.active').scrollIntoView(
                         {behavior:"smooth", block: "nearest", });
                 },300)
-                console.log(123)
+            },
+            
+            volumeBarControl:
+            function(){
+                setTimeout(()=> {
+                    if (app.onOffVolumeBar == 1){
+                        console.log(456)
+                        app.volumeBarControl()
+                    } else if (app.onOffVolumeBar == 2){
+                        console.log(123)
+                        volumeBar.classList.remove('showFixed')
+                    }
+                }, 2000)
             },
 
             playRandomSong: function(){
@@ -481,6 +509,7 @@
             loadConfig: function(){
                 this.isRandom = this.config.isRandom
                 this.isRepeat = this.config.isRepeat
+                this.volumeNum = this.config.volumeNumber
             },
 
             // playingSong: function(){
@@ -496,7 +525,6 @@
                 app.render()
             },
 
-            
             start: function(){
                 // Gán cấu hình từ config vào ứng dụng
                 this.loadConfig()
@@ -517,7 +545,8 @@
 
                 repeatBtn.classList.toggle('active', app.isRepeat)
 
-                
+                document.querySelector('.volume-selection input').value = app.config.volumeNumber
+                document.querySelector('.volume-selection progress').value = app.config.volumeNumber/100
 
 
                 // this.playingSong()
