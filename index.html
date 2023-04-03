@@ -432,26 +432,34 @@
                     var volumeValue = e.target.value >= 1? e.target.value : 0
                     volumeFill.setAttribute('value', volumeValue)
                     
-                    console.log(volumeValue)
-                    if (volumeValue <= 10 && volumeValue >= 1){
-                        audio.volume = volumeValue/100
-
-                        document.querySelector('.volume-selection .vlmadj-icon').style.color = "#666"
-
-                        document.querySelector('.volume-selection .vlmadj-icon').classList.remove('fa-volume-xmark')
-                    
-                    } else if (volumeValue >10){
-                        audio.volume = volumeValue/100
-
-                        document.querySelector('.volume-selection .vlmadj-icon').style.color = "#f5f5f5"
-
-                        document.querySelector('.volume-selection .vlmadj-icon').classList.remove('fa-volume-xmark')
-                        
-                    } else if (volumeValue < 1 ){
+                    audio.volume = volumeValue/100
+                    document.querySelector('.volume-selection .vlmadj-icon').style.color = "#666"
+                    if (volumeValue < 1) {
                         document.querySelector('.volume-selection .vlmadj-icon').classList.add('fa-volume-xmark')
-
-                        audio.volume = volumeValue/100
+                    } else {
+                        document.querySelector('.volume-selection .vlmadj-icon').classList.remove('fa-volume-xmark')
+                        if (volumeValue > 10) {
+                            document.querySelector('.volume-selection .vlmadj-icon').style.color = "#f5f5f5"
+                        }
                     }
+                    //     audio.volume = volumeValue/100
+
+                    //     document.querySelector('.volume-selection .vlmadj-icon').style.color = "#666"
+
+                    //     document.querySelector('.volume-selection .vlmadj-icon').classList.remove('fa-volume-xmark')
+                    
+                    // } else if (volumeValue >10){
+                    //     audio.volume = volumeValue/100
+
+                    //     document.querySelector('.volume-selection .vlmadj-icon').style.color = "#f5f5f5"
+
+                    //     document.querySelector('.volume-selection .vlmadj-icon').classList.remove('fa-volume-xmark')
+                        
+                    // } else if (volumeValue < 1 ){
+                    //     document.querySelector('.volume-selection .vlmadj-icon').classList.add('fa-volume-xmark')
+
+                    //     audio.volume = volumeValue/100
+                    // }
 
                     app.setconfig('volumeNumber', volumeValue)
                 }
@@ -546,7 +554,8 @@
                 repeatBtn.classList.toggle('active', app.isRepeat)
 
                 document.querySelector('.volume-selection input').value = app.config.volumeNumber
-                document.querySelector('.volume-selection progress').value = app.config.volumeNumber/100
+                document.querySelector('.volume-selection progress').value = parseInt(app.config.volumeNumber)
+                audio.volume = app.config.volumeNumber/100
 
 
                 // this.playingSong()
